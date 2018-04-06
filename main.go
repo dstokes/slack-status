@@ -13,14 +13,17 @@ import (
 )
 
 type workspace struct {
-	Token string
+	Token  string
+	Groups []string
 }
 
 var (
 	f = flag.NewFlagSet("flags", flag.ExitOnError)
 
 	// options
-	awayFlag = f.Bool("away", false, "away")
+	awayFlag      = f.Bool("away", false, "away")
+	groupFlag     = f.StringP("group", "g", "", "group")
+	workspaceFlag = f.StringP("workspace", "w", "", "workspace")
 )
 
 func main() {
@@ -33,8 +36,8 @@ func main() {
 	}
 	configFile := path.Join(usr.HomeDir, ".slack-status")
 
-	var spaces map[string]workspace
-	_, err = toml.DecodeFile(configFile, &spaces)
+	var cfg map[string]workspace
+	_, err = toml.DecodeFile(configFile, &cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -54,8 +57,24 @@ func main() {
 		presence = "away"
 	}
 
-	for _, cfg := range spaces {
-		api := slack.New(cfg.Token)
+	for name, c := range cfg {
+		if *workspaceFlag != "" && *workspaceFlag != name {
+			continue
+		}
+		if *groupFlag != "" {
+			found := false
+			for _, g := range c.Groups {
+				if g == *groupFlag {
+					found = true
+					break
+				}
+			}
+			if found == false {
+				continue
+			}
+		}
+
+		api := slack.New(c.Token)
 
 		if err := api.SetUserPresence(presence); err != nil {
 			log.Fatal(err)
