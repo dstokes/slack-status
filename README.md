@@ -30,7 +30,7 @@ slack-status
 
 configuration
 =============
-Configuration is defined in a toml file at `~/.slack-status`
+Configuration is defined in a toml file at `~/.slack-status`. You can get your slack token(s) [here](https://api.slack.com/custom-integrations/legacy-tokens).
 
 ```
 [my_org]

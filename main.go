@@ -76,8 +76,17 @@ func main() {
 
 		api := slack.New(c.Token)
 
-		if err := api.SetUserPresence(presence); err != nil {
+		// check user presence
+		resp, err := api.GetUserPresence("")
+		if err != nil {
 			log.Fatal(err)
+		} else {
+			if (resp.Presence == "active" && presence == "away") ||
+				(resp.Presence == "away" && presence == "auto") {
+				if err := api.SetUserPresence(presence); err != nil {
+					log.Fatal(err)
+				}
+			}
 		}
 
 		if err := api.SetUserCustomStatus(message, icon); err != nil {
